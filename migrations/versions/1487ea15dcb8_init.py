@@ -1,8 +1,8 @@
 """init
 
-Revision ID: 518dd59f25c8
+Revision ID: 1487ea15dcb8
 Revises: 
-Create Date: 2022-02-12 00:17:29.591756
+Create Date: 2022-02-12 14:43:00.114592
 
 """
 from alembic import op
@@ -11,7 +11,7 @@ import sqlmodel
 
 
 # revision identifiers, used by Alembic.
-revision = '518dd59f25c8'
+revision = '1487ea15dcb8'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -25,16 +25,20 @@ def upgrade():
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('user',
+    sa.Column('username', sa.VARCHAR(), nullable=True),
     sa.Column('id', sa.Integer(), nullable=True),
     sa.Column('email', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
     sa.Column('password', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
     sa.Column('first_name', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
     sa.Column('last_name', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
+    sa.Column('public_key', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
+    sa.Column('private_key', sqlmodel.sql.sqltypes.AutoString(), nullable=False),
     sa.Column('profile_pic', sqlmodel.sql.sqltypes.AutoString(), nullable=True),
     sa.Column('is_staff', sa.Boolean(), nullable=True),
     sa.Column('group_id', sa.Integer(), nullable=True),
     sa.ForeignKeyConstraint(['group_id'], ['usergroup.id'], ),
-    sa.PrimaryKeyConstraint('id')
+    sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('username')
     )
     # ### end Alembic commands ###
 

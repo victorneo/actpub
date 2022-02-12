@@ -1,7 +1,7 @@
 from typing import Optional
 from fastapi import APIRouter, Body, Depends, HTTPException, Response, status
 from fastapi.responses import JSONResponse
-from db.db import get_session
+from db.db import async_session
 from sqlmodel import Session, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from models.users import User
@@ -19,7 +19,7 @@ url = 'https://' + base_url + '/users/vic'
 
 
 @router.get('/.well-known/webfinger')
-async def webfinger():
+async def webfinger(resource: str):
     return {
         "subject": "acct:vic@"+base_url,
         "aliases": [
@@ -41,11 +41,11 @@ async def get_user(username: str):
         "@context": ["https://www.w3.org/ns/activitystreams"],
         "type": "Person",
         "id": url,
-        "following": url + '/following.json',
-        "followers": url + '/followers.json',
-        "liked": url + '/liked.json',
-        "inbox": url + '/inbox.json',
-        "outbox": url + '/feed.json',
+        "following": url + '/following',
+        "followers": url + '/followers',
+        "liked": url + '/liked',
+        "inbox": url + '/inbox',
+        "outbox": url + '/outbox',
         "preferredUsername": "victorneo",
         "name": "Victor Neo",
         "summary": "Dummy profile",
@@ -54,14 +54,14 @@ async def get_user(username: str):
     }
 
 
-
 @router.get("/users/id/{user_id}")
 async def get_user(user_id: int, response: Response):
     user = None
-    session = await get_session()
-    statement = select(User).where(User.id == user_id)
-    results = await session.execute(statement)
-    user = results.first()
+
+    async with async_session() as s:
+        statement = select(User).where(User.id == user_id)
+        results = await s.execute(statement)
+        user = results.first()
 
     if user:
         user = user[0]
