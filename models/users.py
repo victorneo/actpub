@@ -29,6 +29,13 @@ class User(SQLModel, table=True):
     group: Optional[UserGroup] = Relationship(back_populates="users")
 
 
+class RemoteUser(SQLModel, table=True):
+    id: int = Field(default=None, primary_key=True)
+    remote_id: str = Field(sa_column=Column('username', VARCHAR, unique=True))
+    inbox: str
+    public_key: Optional[str]
+
+
 def generate_new_pk() -> RSAPrivateKey:
     return rsa.generate_private_key(public_exponent=65537, key_size=4096)
 
@@ -57,7 +64,7 @@ def create_user(username: str, password: str, email: str, first_name: str, last_
 
     user.private_key = pk.private_bytes(
         encoding=serialization.Encoding.PEM,
-        format=serialization.PrivateFormat.TraditionalOpenSSL,
+        format=serialization.PrivateFormat.PKCS8,
         encryption_algorithm=serialization.NoEncryption()
     ).decode('utf-8')
 
